@@ -372,7 +372,7 @@ export function ProjectDetailModal({
           <div className="relative w-full max-w-6xl md:max-w-[90vw] h-[90vh] md:h-[90vh] rounded-3xl border border-white/15 bg-gradient-to-b from-[#0c0c12] to-black shadow-[0_35px_90px_rgba(0,0,0,0.7)] overflow-hidden">
             <button
               onClick={() => setDetailEpisodeIndex(null)}
-              className="absolute top-4 right-4 z-10 bg-white/10 hover:bg-white/15 rounded-full p-2 border border-white/15 transition-colors"
+              className="absolute top-4 right-12 md:right-14 z-10 bg-white/10 hover:bg-white/15 rounded-full p-2 border border-white/15 transition-colors"
               aria-label="Close episode detail"
             >
               <X className="h-5 w-5" />
