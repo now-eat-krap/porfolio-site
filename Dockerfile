@@ -8,7 +8,8 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 FROM base AS deps
 COPY package.json package-lock.json* ./
-RUN npm ci
+# Allow peer dep mismatch (React 19 vs some libs) during install.
+RUN npm ci --legacy-peer-deps
 
 FROM deps AS builder
 COPY . .
