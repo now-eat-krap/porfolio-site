@@ -20,6 +20,12 @@ npm run build
 npm start
 ```
 
+## 도커 배포
+- 빌드: `docker build -t portfolio-site .`
+- 실행(HTTP, Cloudflare에서 TLS 종료): `docker run -d -p 3000:3000 --env-file .env.production --name portfolio-site portfolio-site`
+- 컨테이너는 `PORT=3000`, `HOSTNAME=0.0.0.0`로 동작하며, 필요한 환경 변수를 `.env.production` 등에 정의해 `--env-file`로 주입하세요.
+- Cloudflare에서 HTTPS를 끝내고 오리진에는 HTTP로 연결하면 됩니다.
+
 ## 주요 기능
 - Hero/Navigation: 넷플릭스 스타일 로고, 앵커 네비게이션
 - Projects: 카드 목록 + 상세 모달(회차/에피소드별 콘텐츠)
