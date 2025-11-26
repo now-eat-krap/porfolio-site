@@ -28,13 +28,13 @@ export function Hero() {
         <div className="max-w-4xl space-y-6">
           <div className="space-y-2">
             <p className="text-5xl sm:text-5xl md:text-5xl font-semibold text-white/90 animate-fade-in-up">
-              Taewon Park - Quant Developer
+              Taewon Park - Product Engineer
             </p>
           </div>
 
           <div className="space-y-2 text-sm sm:text-base md:text-lg text-white/90 max-w-3xl animate-fade-in-up leading-relaxed">
             <p>
-              아이디어를 가장 빠르게 제품으로 만들기 위해 서비스 임팩트를 최우선으로 보고, 프론트·백엔드·배포 흐름을 한 손에 쥐고 빠르게 검증합니다.
+              개발은 자신의 아이디어를 가장 빠르고, 쉽고, 싸게 구현할 수 있는 하나의 도구라고 생각하는 개발자.
             </p>
           </div>
 

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { X, Github } from "lucide-react"
+import { X, Github, ChevronLeft, ChevronRight } from "lucide-react"
 
 interface Project {
   title: string
@@ -109,28 +109,81 @@ export function ProjectDetailModal({
     tags: project.tags,
   }
 
-  const episodeItems: EpisodeItem[] = [
-    {
+  const mappedEpisodes =
+    project.detailEpisodes?.map((ep, idx) => ({
       ...baseEpisodeInfo,
-      title: "1화 · 프로젝트 개요",
-      description: project.description,
-      detail: project.longDescription,
-    },
-    {
-      ...baseEpisodeInfo,
-      title: "2화 · 구현 기능",
-      description: "핵심 구현 기능을 모아봤어요.",
-      detail: "핵심 구현 기능을 모아봤어요.",
-    },
-    {
-      ...baseEpisodeInfo,
-      title: "3화 · 문제 해결 & 회고",
-      description: project.contribution || "문제 해결 과정과 배운 점을 정리했어요.",
-      detail: project.contribution || "트러블슈팅·회고 내용을 채워주세요.",
-    },
-  ]
-  const detailEpisodes = project.detailEpisodes || episodeItems
-  const activeEpisode = episodeItems[activeIndex] ?? episodeItems[0]
+      title: ep.title || `EP ${idx + 1}`,
+      description: ep.description || project.description,
+      detail: ep.detail || ep.description || project.longDescription,
+      features: ep.features ?? project.features,
+      tags: ep.tags || baseEpisodeInfo.tags,
+      image: ep.image || baseEpisodeInfo.image,
+    })) || []
+  const fallbackEpisode: EpisodeItem = {
+    ...baseEpisodeInfo,
+    title: "프로젝트 소개",
+    description: project.description,
+    detail: project.longDescription,
+    features: project.features,
+  }
+  const episodeItems = mappedEpisodes.length ? mappedEpisodes : [fallbackEpisode]
+  const totalEpisodes = episodeItems.length
+
+  const activeEpisode = episodeItems[Math.min(activeIndex, episodeItems.length - 1)] ?? episodeItems[0]
+  const heroImage = project.image || "/placeholder.svg"
+
+  const goToEpisode = (nextIndex: number) => {
+    const wrappedIndex = ((nextIndex % totalEpisodes) + totalEpisodes) % totalEpisodes
+    setActiveIndex(wrappedIndex)
+    setDetailEpisodeIndex(wrappedIndex)
+  }
+
+  const renderMarkdown = (markdown: string) => {
+    const inlineToHtml = (text: string) => {
+      const escaped = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      return escaped
+        .replace(/`([^`]+)`/g, '<code class="rounded bg-white/10 px-1 py-0.5 text-[12px] text-white/90">$1</code>')
+        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+    }
+
+    const lines = markdown.trim().split(/\n+/)
+    const nodes: JSX.Element[] = []
+    let listBuffer: JSX.Element[] = []
+    const flushList = () => {
+      if (!listBuffer.length) return
+      nodes.push(
+        <ul key={`ul-${nodes.length}`} className="list-disc list-inside space-y-1 text-base text-white/90">
+          {listBuffer}
+        </ul>,
+      )
+      listBuffer = []
+    }
+
+    lines.forEach((line, idx) => {
+      if (/^\s*[-*]\s+/.test(line)) {
+        const content = line.replace(/^\s*[-*]\s+/, "")
+        listBuffer.push(
+          <li
+            key={`li-${idx}`}
+            className="leading-7"
+            dangerouslySetInnerHTML={{ __html: inlineToHtml(content) }}
+          />,
+        )
+      } else {
+        flushList()
+        nodes.push(
+          <p
+            key={`p-${idx}`}
+            className="text-base text-white/90 leading-7"
+            dangerouslySetInnerHTML={{ __html: inlineToHtml(line) }}
+          />,
+        )
+      }
+    })
+    flushList()
+    return nodes
+  }
 
   return (
     <>
@@ -139,7 +192,7 @@ export function ProjectDetailModal({
           {/* Hero Section */}
           <div className="relative h-[85vh] w-full">
             <div className="absolute inset-0">
-              <img src={project.image || "/placeholder.svg"} alt={project.title} className="w-full h-full object-cover" />
+              <img src={heroImage} alt={project.title} className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
               <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
             </div>
@@ -159,7 +212,7 @@ export function ProjectDetailModal({
                 <div className="max-w-2xl space-y-6">
                   <div className="flex items-center gap-3 animate-slide-up">
                     <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 text-xs font-semibold text-white/90 tracking-wide">
-                      EP {activeIndex + 1}
+                      PROJECT
                     </span>
                     <span className="rounded-full bg-white/10 border border-white/20 px-3 py-1 text-xs font-semibold text-white/90 tracking-wide">
                       {project.role}
@@ -171,7 +224,7 @@ export function ProjectDetailModal({
                     className="flex flex-wrap items-center gap-4 text-sm animate-slide-up"
                     style={{ animationDelay: "0.1s" }}
                   >
-                    <span className="text-green-500 font-semibold">95% Match</span>
+                    <span className="text-green-500 font-semibold">100% Match</span>
                     <span className="text-white/80">{project.duration}</span>
                     <Badge variant="outline" className="border-muted-foreground/50">
                       {project.role}
@@ -182,7 +235,7 @@ export function ProjectDetailModal({
                     className="text-lg md:text-xl text-white/85 leading-relaxed animate-slide-up"
                     style={{ animationDelay: "0.2s" }}
                   >
-                    {activeEpisode.description}
+                    {project.description}
                   </p>
 
                   <div className="flex flex-wrap gap-3 animate-slide-up" style={{ animationDelay: "0.3s" }}>
@@ -253,30 +306,8 @@ export function ProjectDetailModal({
                             </div>
 
                             <div className="flex-1 py-2 pr-3 space-y-2">
-                              <div className="flex flex-wrap items-center gap-2 text-xs text-white/70">
-                                <span className="rounded-full border border-white/20 px-2 py-1 bg-white/5">{ep.duration}</span>
-                                <span className="text-white/50">•</span>
-                                <span className="text-white/70">{ep.role}</span>
-                              </div>
                               <h3 className="text-lg font-semibold text-white">{ep.title}</h3>
                               <p className="text-sm text-white/75 leading-relaxed line-clamp-1">{ep.description}</p>
-                              {ep.features?.length ? (
-                                <ul className="grid sm:grid-cols-2 gap-2 text-xs text-white/75">
-                                  {ep.features.slice(0, 6).map((feature, featureIndex) => (
-                                    <li key={featureIndex} className="flex items-start gap-2 rounded-lg bg-white/5 px-3 py-2 border border-white/5">
-                                      <span className="text-primary mt-0.5">•</span>
-                                      <span className="leading-relaxed">{feature}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              ) : null}
-                              <div className="flex flex-wrap gap-2">
-                                {ep.tags.slice(0, 4).map((tag) => (
-                                  <Badge key={tag} variant="secondary" className="text-[11px] bg-white/10 text-white border-white/10">
-                                    {tag}
-                                  </Badge>
-                                ))}
-                              </div>
                             </div>
                           </div>
                         </button>
@@ -336,9 +367,9 @@ export function ProjectDetailModal({
         </div>
       </div>
 
-      {detailEpisodeIndex !== null && (detailEpisodes[detailEpisodeIndex] || episodeItems[detailEpisodeIndex]) && (
+      {detailEpisodeIndex !== null && (episodeItems[detailEpisodeIndex] || episodeItems[0]) && (
         <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center px-4 py-10 animate-fade-in">
-          <div className="relative w-full max-w-[90vw] rounded-3xl border border-white/15 bg-gradient-to-b from-[#0c0c12] to-black shadow-[0_35px_90px_rgba(0,0,0,0.7)] overflow-hidden md:min-h-[70vh]">
+          <div className="relative w-full max-w-6xl md:max-w-[90vw] h-[90vh] md:h-[90vh] rounded-3xl border border-white/15 bg-gradient-to-b from-[#0c0c12] to-black shadow-[0_35px_90px_rgba(0,0,0,0.7)] overflow-hidden">
             <button
               onClick={() => setDetailEpisodeIndex(null)}
               className="absolute top-4 right-4 z-10 bg-white/10 hover:bg-white/15 rounded-full p-2 border border-white/15 transition-colors"
@@ -348,25 +379,23 @@ export function ProjectDetailModal({
             </button>
 
             {(() => {
-              const fallback = episodeItems[detailEpisodeIndex!] || episodeItems[0]
-              const detail = detailEpisodes[detailEpisodeIndex!] || fallback
-              const detailTags = detail.tags || fallback.tags
-              const detailImage = detail.image || fallback.image
-              const detailTitle = detail.title || fallback.title
-              const detailDescription = detail.description || fallback.description
-              const detailBody = detail.detail || fallback.detail || fallback.description
-              const detailFeatures = detail.features || fallback.features
+              const detail = episodeItems[detailEpisodeIndex!] || episodeItems[0]
+              const detailTags = detail.tags || baseEpisodeInfo.tags
+              const detailImage = detail.image || baseEpisodeInfo.image
+              const detailTitle = detail.title || `EP ${detailEpisodeIndex! + 1}`
+              const detailDescription = detail.description || activeEpisode.description
+              const detailBody = detail.detail || detail.description || activeEpisode.detail || activeEpisode.description
+              const detailFeatures = detail.features || activeEpisode.features
 
               return (
-                <div className="grid md:grid-cols-[1.2fr_1fr] lg:grid-cols-[1.35fr_1fr] gap-0">
-                  <div className="relative h-full min-h-[320px] md:min-h-[420px]">
-                    <div className="absolute inset-0">
+                <div className="grid md:grid-cols-[1.2fr_1fr] lg:grid-cols-[1.35fr_1fr] gap-0 h-full min-h-0">
+                  <div className="relative h-full min-h-[320px] min-w-0">
+                    <div className="absolute inset-0 flex items-start justify-center bg-black">
                       <img
                         src={detailImage || "/placeholder.svg"}
                         alt={detailTitle}
-                        className="w-full h-full object-cover"
+                        className="h-full w-full max-w-full object-contain object-top"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-transparent" />
                     </div>
                     <div className="relative h-full p-8 flex flex-col justify-end space-y-4 bg-gradient-to-t from-black/40 via-black/20 to-transparent">
                       <div className="flex flex-wrap gap-2 text-[11px] text-white/85">
@@ -381,39 +410,65 @@ export function ProjectDetailModal({
                     </div>
                   </div>
 
-                  <div className="p-8 space-y-7 bg-black/88 md:max-h-[80vh] overflow-y-auto">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2 text-xs text-white/60 uppercase tracking-[0.08em]">
-                        <span className="h-px w-6 bg-primary/70" />
-                        <span>Episode Detail</span>
+                  <div className="p-8 bg-black/88 h-full flex flex-col min-w-0 min-h-0">
+                    <div className="space-y-7 overflow-y-auto pr-1 flex-1 min-h-0">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-xs text-white/60 uppercase tracking-[0.08em]">
+                          <span className="h-px w-6 bg-primary/70" />
+                          <span>Episode Detail</span>
+                        </div>
+                        <div className="space-y-2">{renderMarkdown(detailBody)}</div>
                       </div>
-                      <p className="text-base text-white/90 leading-7">{detailBody}</p>
+
+                      {detailFeatures?.length ? (
+                        <div className="space-y-3">
+                          <h4 className="text-base font-semibold text-white">이 회차 하이라이트</h4>
+                          <ul className="space-y-2 text-sm text-white/90">
+                            {detailFeatures.map((feature, idx) => (
+                              <li key={idx} className="flex gap-3 rounded-xl bg-white/5 px-3.5 py-2.5 border border-white/10">
+                                <span className="text-primary mt-0.5">•</span>
+                                <span>{feature}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
+
+                      <div className="space-y-3">
+                        <h4 className="text-base font-semibold text-white">관련 태그</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {detailTags.slice(0, 8).map((tag) => (
+                            <Badge key={tag} variant="secondary" className="text-[11px] bg-white/10 text-white border-white/10">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
                     </div>
 
-                    {detailFeatures?.length ? (
-                      <div className="space-y-3">
-                        <h4 className="text-base font-semibold text-white">이 회차 하이라이트</h4>
-                        <ul className="space-y-2 text-sm text-white/90">
-                          {detailFeatures.map((feature, idx) => (
-                            <li key={idx} className="flex gap-3 rounded-xl bg-white/5 px-3.5 py-2.5 border border-white/10">
-                              <span className="text-primary mt-0.5">•</span>
-                              <span>{feature}</span>
-                            </li>
-                          ))}
-                        </ul>
+                    {totalEpisodes > 1 ? (
+                      <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                        <Button
+                          variant="outline"
+                          className="border-white/20 text-white hover:bg-white/10"
+                          onClick={() => goToEpisode((detailEpisodeIndex ?? activeIndex) - 1)}
+                        >
+                          <ChevronLeft className="h-4 w-4 mr-1" />
+                          이전 회차
+                        </Button>
+                        <div className="text-xs text-white/60">
+                          {detailEpisodeIndex !== null ? detailEpisodeIndex + 1 : activeIndex + 1} / {totalEpisodes}
+                        </div>
+                        <Button
+                          variant="outline"
+                          className="border-white/20 text-white hover:bg-white/10"
+                          onClick={() => goToEpisode((detailEpisodeIndex ?? activeIndex) + 1)}
+                        >
+                          다음 회차
+                          <ChevronRight className="h-4 w-4 ml-1" />
+                        </Button>
                       </div>
                     ) : null}
-
-                    <div className="space-y-3">
-                      <h4 className="text-base font-semibold text-white">관련 태그</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {detailTags.slice(0, 8).map((tag) => (
-                          <Badge key={tag} variant="secondary" className="text-[11px] bg-white/10 text-white border-white/10">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
                   </div>
                 </div>
               )

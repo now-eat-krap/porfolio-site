@@ -3,7 +3,7 @@ export function AboutSection() {
     {
       period: "2019.04 ~ 2023.03",
       title: "가고시마대학 기계공학과 · 기계제어연구실",
-      detail: "로봇 제어 실험과 데이터 기반 모델링을 반복하며 엔지니어링 감각과 문제 해결 습관을 키웠습니다.",
+      detail: "기계 제어 실험과 데이터 기반 모델링을 반복하며 엔지니어링 감각과 문제 해결 습관을 키웠습니다.",
       papers: [
         {
           title: "그림책 읽어주기 시간에 아동의 머리 움직임을 시각화하는 시스템",
@@ -43,7 +43,7 @@ export function AboutSection() {
               </div>
               <div className="space-y-1">
                 <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight">박태원</h2>
-                <p className="text-sm text-white/70">백엔드/퀀트 지향 개발자</p>
+                <p className="text-sm text-white/70">퀀트 지향 개발자</p>
               </div>
             </div>
 
