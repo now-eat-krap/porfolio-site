@@ -198,29 +198,6 @@ export default async function ProjectPage({ params }: PageProps) {
                   </div>
                 ) : null}
 
-                {sec.cases?.length ? (
-                  <div className="flex flex-col gap-4">
-                    <p className="section-label">트러블슈팅</p>
-                    <div className="flex flex-col divide-y divide-border border-y border-border">
-                      {sec.cases.map((c) => (
-                        <dl key={c.symptom} className="flex flex-col gap-2 py-5">
-                          {[
-                            { k: "증상", v: c.symptom, strong: true },
-                            { k: "원인", v: c.cause },
-                            { k: "조치", v: c.fix },
-                          ].map((row) => (
-                            <div key={row.k} className="grid gap-1 sm:grid-cols-[56px_1fr] sm:gap-4">
-                              <dt className="text-[12.5px] font-bold text-muted-foreground sm:pt-0.5">{row.k}</dt>
-                              <dd className={row.strong ? "font-semibold text-foreground" : "text-foreground/80"}>
-                                {row.v}
-                              </dd>
-                            </div>
-                          ))}
-                        </dl>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
               </div>
             </section>
           ))
