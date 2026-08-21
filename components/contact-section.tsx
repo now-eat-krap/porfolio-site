@@ -1,40 +1,45 @@
-import { Button } from "@/components/ui/button"
-import { Mail, Github, Linkedin, Twitter } from "lucide-react"
+import { Github, Mail } from "lucide-react"
+import { Eyebrow } from "@/components/eyebrow"
+import { profile } from "@/lib/profile"
 
+/** 잉크색 띠로 마무리하는 연락 구역 (푸터 포함) */
 export function ContactSection() {
   return (
-    <section id="contact" className="py-24 px-6 bg-secondary/30">
-      <div className="container mx-auto">
-        <div className="max-w-3xl mx-auto text-center space-y-8">
-          <div className="space-y-4">
-            <h2 className="text-4xl md:text-5xl font-bold text-balance">함께 일하고 싶으신가요?</h2>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              새로운 프로젝트나 협업 기회에 대해 언제든 연락 주세요. 흥미로운 아이디어를 함께 실현해 나가고 싶습니다.
-            </p>
+    <section id="contact" className="scroll-mt-20 bg-ink text-ink-foreground">
+      <div className="mx-auto flex w-full max-w-[1080px] flex-col gap-12 px-5 py-14 sm:px-8 sm:py-[72px]">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-2.5">
+            <Eyebrow tone="live">03 · Contact</Eyebrow>
+            <h2 className="font-display text-[26px] font-black tracking-[-0.03em] sm:text-[32px]">{profile.contact.title}</h2>
+            <p className="text-[14.5px] text-ink-foreground/65">{profile.contact.body}</p>
           </div>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button size="lg" asChild>
-              <a href="mailto:taewonb916@gmail.com">
-                <Mail className="h-5 w-5 mr-2" />
-                이메일 보내기
-              </a>
-            </Button>
-          </div>
-
-          <div className="flex items-center justify-center gap-4 pt-8">
-            <Button variant="ghost" size="icon" asChild>
-              <a href="https://github.com/now-eat-krap" target="_blank" rel="noopener noreferrer">
-                <Github className="h-5 w-5" />
-                <span className="sr-only">GitHub</span>
-              </a>
-            </Button>
+          <div className="flex flex-wrap gap-2.5">
+            <a
+              href={`mailto:${profile.email}`}
+              className="inline-flex items-center gap-2 rounded-xl bg-ink-foreground px-5 py-3 text-sm font-bold text-ink transition-opacity hover:opacity-85"
+            >
+              <Mail className="h-4 w-4" />
+              {profile.email}
+            </a>
+            <a
+              href={profile.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-xl border border-ink-foreground/25 px-5 py-3 text-sm font-semibold transition-colors hover:border-ink-foreground/60"
+            >
+              <Github className="h-4 w-4" />
+              GitHub
+            </a>
           </div>
         </div>
-      </div>
-
-      <div className="container mx-auto mt-24 pt-8 border-t border-border">
-        <p className="text-center text-sm text-muted-foreground">© 2025 Developer Portfolio. All rights reserved.</p>
+        <footer className="flex items-center justify-between text-xs text-ink-foreground/45">
+          <span>
+            © {new Date().getFullYear()} {profile.nameEn}
+          </span>
+          <a href={profile.github} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-ink-foreground">
+            {profile.githubLabel}
+          </a>
+        </footer>
       </div>
     </section>
   )
